@@ -42,7 +42,7 @@ jobs:
           gradle :app:assembleDebug --no-daemon > /tmp/build.log 2>&1
           code=$?
           if [ "$code" -ne 0 ]; then
-            head -c 12000 /tmp/build.log | while IFS= read -r line; do echo "::notice::$line"; done
+            tail -c 6000 /tmp/build.log | base64 -w0 | xargs -I{} echo "::warning::BUILD_LOG_BASE64 {}"
           fi
           exit "$code"
       - uses: actions/upload-artifact@v4
