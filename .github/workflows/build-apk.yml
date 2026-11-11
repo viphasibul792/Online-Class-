@@ -39,10 +39,10 @@ jobs:
         working-directory: project
         run: |
           set +e
-          gradle :app:assembleDebug --no-daemon --stacktrace > /tmp/build.log 2>&1
+          gradle :app:assembleDebug --no-daemon > /tmp/build.log 2>&1
           code=$?
           if [ "$code" -ne 0 ]; then
-            tail -c 10000 /tmp/build.log | while IFS= read -r line; do echo "::notice::$line"; done
+            head -c 12000 /tmp/build.log | while IFS= read -r line; do echo "::notice::$line"; done
           fi
           exit "$code"
       - uses: actions/upload-artifact@v4
