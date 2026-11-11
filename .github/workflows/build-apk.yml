@@ -26,17 +26,10 @@ jobs:
           gradle-version: '9.3.1'
       - name: Extract project
         run: unzip -q Pdf.g.v03.zip -d project
-      - name: Diagnose Android SDK
-        run: |
-          echo "::notice::ANDROID_HOME=$ANDROID_HOME ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "::notice::sdkmanager=$(command -v sdkmanager || true)"
-          echo "::notice::sdk dirs=$(ls -la /usr/local/lib/android/sdk/cmdline-tools/ 2>&1 | tr '\n' ' ')"
-      - uses: android-actions/setup-android@v3
-        continue-on-error: true
       - name: Install Android SDK
         run: |
           set +e
-          sdkmanager 'platforms;android-36' 'platforms;android-36.1' 'build-tools;36.0.0' > /tmp/sdk.log 2>&1
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'platforms;android-36.1' 'build-tools;36.0.0' > /tmp/sdk.log 2>&1
           code=$?
           tail -c 3000 /tmp/sdk.log | while IFS= read -r line; do echo "::notice::$line"; done
           exit $code
@@ -44,7 +37,14 @@ jobs:
         run: keytool -genkeypair -v -keystore project/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
       - name: Build debug APK
         working-directory: project
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+        run: |
+          set +e
+          gradle :app:assembleDebug --no-daemon --stacktrace > /tmp/build.log 2>&1
+          code=$?
+          if [ "$code" -ne 0 ]; then
+            tail -c 10000 /tmp/build.log | while IFS= read -r line; do echo "::notice::$line"; done
+          fi
+          exit "$code"
       - uses: actions/upload-artifact@v4
         with:
           name: PDF-Gallery-debug
