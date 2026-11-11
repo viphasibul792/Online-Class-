@@ -25,7 +25,10 @@ jobs:
         with:
           gradle-version: '9.3.1'
       - name: Extract project
-        run: unzip -q Pdf.g.v03.zip -d project
+        run: |
+          unzip -q Pdf.g.v03.zip -d project
+          sed -i 's/cz.adaptive:tesseract4android/cz.adaptech.tesseract4android:tesseract4android/' project/app/build.gradle.kts
+          sed -i '/    mavenCentral()/a\    maven { url = uri("https://jitpack.io") }' project/settings.gradle.kts
       - name: Install Android SDK
         run: |
           set +e
