@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -53,3 +53,13 @@ jobs:
           name: PDF-Gallery-debug
           path: project/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+      - name: Publish debug prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "pdf-gallery-v03-debug-${GITHUB_RUN_NUMBER}" \
+            project/app/build/outputs/apk/debug/*.apk \
+            --target "$GITHUB_SHA" \
+            --title "PDF Gallery v03 (debug build ${GITHUB_RUN_NUMBER})" \
+            --notes "Debug APK built from Pdf.g.v03.zip with corrected Tesseract dependency coordinates. Signed with a build-specific debug key; not intended for production or Play Store distribution." \
+            --prerelease
