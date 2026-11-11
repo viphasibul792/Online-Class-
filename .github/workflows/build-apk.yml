@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +26,7 @@ jobs:
           gradle-version: '9.3.1'
       - name: Extract project
         run: unzip -q Pdf.g.v03.zip -d project
+      - uses: android-actions/setup-android@v3
       - name: Install Android SDK
         run: |
           yes | sdkmanager --licenses > /dev/null || true
